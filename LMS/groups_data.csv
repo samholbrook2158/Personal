@@ -1,0 +1,6 @@
+id,name,description,key,price,owner_id,belongs_to_branch,max_redemptions,redemptions_sofar
+25,CNY,Central NY Learners,,&#36;0.00,7,5,,
+27,HRR,Hudson River Region Learners,,&#36;0.00,7,5,,
+29,LI,Long Island Learners,,&#36;0.00,9,5,,
+28,NYC,NYC Learners,,&#36;0.00,9,5,,
+26,WNY,Western NY Learners,,&#36;0.00,8,5,,

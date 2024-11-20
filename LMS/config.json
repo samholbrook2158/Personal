@@ -1,0 +1,68 @@
+{
+   "SYSTEM_INFO" :  { "SYSTEM" : "",
+                      "IP" : ""},
+
+   "ETL_INFO" : { "VERSION" : "1.1.4" },
+
+   "DIRECTORIES" : {
+      "BASE_DIR": "/opt/production_etl/memphi_etl_v2",
+      "LOGS": "/logs"
+   },
+
+    "API": {
+      "base_url": "https://nyprta-rightsandrecovery.talentlms.com/api/v1",
+      "api_key": "uc4jikXXiYcIAAauBgT2BWwSTc8xUD"
+    },
+    "DBSETTINGS": {
+      "user": "root",
+      "password": "Rc5dnp10",
+      "host": "localhost",
+      "port": 3306,
+      "database": "talentlms"
+    },
+
+   "DBSETTINGS" :  {
+
+        "APP_USER":"sholbrook",
+        "APP_PASSWORD":"7Y#FRNA!NT6@MnLtDACf",
+        "APP_DB_HOST":"alliance.5eanalytics.com",
+        "APP_DB_SCHEMA":"systemdashboarddb",
+        "APP_DBPORT": "3306",
+        "APP_DBDRIVER": "pymysql",
+        "APP_CONNECTION_DRIVER" : "mysql+pymysql",
+        "TASKS_SCHEMA": "talentlms",
+        "CONNECTION_SCHEMA" : "talentlms",
+        "INFORMATION_SCHEMA" : "information_schema"
+   },
+
+   "APP_FILE_DIRS" : {
+
+        "APP_DIR": "/opt/production_etl/memphi_etl_v2",
+        "APP_LOG": "ETL_app.log"
+
+   },
+   "CONNECTIONS" : {
+         "ORACLE_CONNECTION_DRIVER":"oracle+cx_oracle",
+         "MYSQL_CONNECTION_DRIVER":"mysql+pymysql",
+         "INTERSYSTEMS_CONNECTION_DRIVER":"mssql+pyodbc",
+         "MSSQL_CONNECTION_DRIVER":"mssql+pymssql"
+   },
+
+
+   "ALERT_SYSTEM" : {"URL" : "https://alerts.5eanalytics.com/api/send/",
+                     "SEND_TO" : "system-alerts-group@5eanalytics.com",
+                     "SENDMESSAGES": 1,
+                     "ACTIVE": "True",
+                     "METHOD": "2"
+                    },
+
+   "ALERT_BODY_FAILED_HEADER" : "Failed Tasks \n------------ \n\n",
+
+   "ALERT_BODY_SUCCESS_HEADER" : "Successful Tasks\n---------------- \n\n",
+
+   "NO_FAILED_TASKS"  : "No Failed Tasks\n",
+   "NO_SUCCESSFUL_TASKS" : "No Successful Tasks\n",
+
+   "CHUNK_LOG" : 100
+
+}

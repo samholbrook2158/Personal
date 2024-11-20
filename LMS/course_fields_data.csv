@@ -1,0 +1,5 @@
+key,type,name,mandatory,visible_on_reports,visible_to_learners,dropdown_values,checkbox_status,selective_availability,branch,main_domain_availability,previous_key
+custom_field_1,text,CEs,yes,yes,yes,,off,no,,,
+custom_field_2,text,Trainer(s),yes,yes,yes,,off,no,,,custom_field_1
+custom_field_3,dropdown,Online or In-Person,yes,yes,yes,Online;In-Person,off,no,,,custom_field_2
+custom_field_4,text,Hours,yes,yes,no,,off,no,,,custom_field_3

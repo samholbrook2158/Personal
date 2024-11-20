@@ -1,0 +1,5 @@
+key,type,name,mandatory,visible_on_reports,dropdown_values,checkbox_status,selective_availability,branch,branch_name,main_domain_availability,previous_key,order
+custom_field_5,dropdown,License Type ,yes,yes,CASAC;CPRP;LCAT;LCSW;LMHC;LMSW;MFT;Not Applicable,off,no,,,,,1
+custom_field_7,dropdown,Region,yes,yes,WNY;CNY;HRR;LI;NYC,off,no,,,,custom_field_5,2
+custom_field_8,text,Organization,yes,yes,,off,no,,,,custom_field_7,3
+custom_field_9,dropdown,Program,yes,yes,PROS;CORE;Other;HCBS;OMH;CC BHC;Multiprogram,off,no,,,,custom_field_8,4
