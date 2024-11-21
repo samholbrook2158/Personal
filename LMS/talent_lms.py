@@ -44,45 +44,7 @@ class TalentAPI(APICall, MemphiAddin):
                                   "use_csv": False, "replace": True}
         }
 
-        self.column_types = {
-            """
-            Need to add comments to signify which column is represented in parameters for later on editing
-            """
-            "users": [
-                "int", "varchar(50)", "varchar(50)", "varchar(50)", "varchar(50)",
-                "int", "varchar(50)", "varchar(60)", "varchar(30)", "varchar(10)",
-                "varchar(30)", "int", "int", "datetime",
-                "datetime", "int", "varchar(130)", "TEXT", "varchar(100)",
-                "varchar(40)", "varchar(20)", "varchar(80)", "varchar(30)", "varchar(90)"
-            ],
-            "courses": [
-                "int", "varchar(100)", "varchar(50)", "int", "text", "varchar(10)", "varchar(10)", "datetime",
-                "datetime", "varchar(30)", "varchar(30)", "int", "datetime", "datetime", "varchar(20)", "int",
-                "varchar(200)", "varchar(200)", "varchar(200)", "varchar(200)", "varchar(50)", "varchar(50)",
-                "varchar(50)",
-                "varchar(50)"
-            ],
-            "groups": [
-                "int", "varchar(70)", "varchar(90)", "varchar(50)", "varchar(20)", "int", "int", "varchar(30)",
-                "varchar(30)"
-            ],
-            "branches": [
-
-            ],
-            "ratelimit": [
-
-            ],
-            "categories": [
-
-            ],
-            "registration": [
-
-            ],
-            "course_fields": [
-
-            ]
-
-        }
+        
 
     def main_process(self, **kwargs):
         """

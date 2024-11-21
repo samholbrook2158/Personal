@@ -1,5 +1,124 @@
 {
   "users": {
-            "id": "int"
+    "id": "int",
+    "login": "varchar(50)",
+    "first_name": "varchar(60)",
+    "last_name": "varchar(50)",
+    "email": "varchar(50)",
+    "restrict_email": "varchar(50)",
+    "user_type": "varchar(50)",
+    "timezone": "varchar(60)",
+    "language": "varchar(30)",
+    "status": "varchar(30)",
+    "deactivation_date": "varchar(10)",
+    "level": "varchar(30)",
+    "points": "int",
+    "created_on": "datetime",
+    "last_updated": "datetime",
+    "last_updated_timestamp": "int",
+    "avatar": "varchar(130)",
+    "bio": "text",
+    "login_key": "varchar(100)",
+    "custom_field_5": "varchar(40)",
+    "custom_field_7": "varchar(20)",
+    "custom_field_8": "varchar(20)",
+    "custom_field_9": "varchar(30)",
+    "custom_field_10": "varchar(90)"
+  },
+  "courses": {
+    "id": "int",
+    "title": "varchar(255)",
+    "description": "text",
+    "start_date": "datetime",
+    "end_date": "datetime",
+    "location": "varchar(255)",
+    "instructor_name": "varchar(255)",
+    "registration_url": "varchar(2083)",
+    "created_on": "datetime",
+    "last_updated": "datetime",
+    "status": "varchar(50)"
+  },
+  "groups": {
+    "id": "int",
+    "name": "varchar(255)",
+    "description": "text",
+    "key": "varchar(255)",
+    "price": "decimal(10,2)",
+    "owner_id": "int",
+    "belongs_to_branch": "int",
+    "max_redemptions": "int",
+    "redemptions_so_far": "int"
+  },
+  "branches": {
+    "id": "int",
+    "name": "varchar(255)",
+    "description": "text",
+    "avatar": "varchar(2083)",
+    "theme": "varchar(255)",
+    "badge_set_id": "int",
+    "timezone": "varchar(100)",
+    "signup_method": "varchar(50)",
+    "signup_type": "varchar(50)",
+    "verification": "varchar(50)",
+    "internal_announcement": "text",
+    "external_announcement": "text",
+    "language": "varchar(10)",
+    "user_type_id": "int",
+    "user_type": "varchar(255)",
+    "group_id": "int",
+    "registration_email_restriction": "varchar(255)",
+    "disable_allow_global_login": "int",
+    "paypal_email": "varchar(255)",
+    "currency": "varchar(20)",
+    "ecommerce_subscription": "int",
+    "ecommerce_subscription_price": "decimal(10,2)",
+    "ecommerce_subscription_interval": "varchar(50)",
+    "ecommerce_subscription_trial_period": "int",
+    "ecommerce_credits": "int"
+  },
+  "ratelimit": {
+    "limit": "int",
+    "remaining": "int",
+    "reset": "bigint",
+    "formatted_reset": "varchar(50)"
+  },
+  "categories": {
+    "id": "int",
+    "name": "varchar(255)",
+    "price": "decimal(10,2)",
+    "parent_category_id": "int"
+  },
+  "registration": {
+    "branch_name": "varchar(255)",
+    "main_domain_availability": "varchar(255)",
+    "previous_key": "varchar(255)",
+    "order": "int",
+    "fields": [
+      {
+        "key": "varchar(255)",
+        "type": "varchar(50)",
+        "name": "varchar(255)",
+        "mandatory": "varchar(10)",
+        "visible_on_reports": "varchar(10)",
+        "dropdown_values": "text",
+        "checkbox_status": "varchar(10)",
+        "selective_availability": "varchar(10)",
+        "branch": "int"
+      }
+    ]
+  },
+  "course_fields": {
+    "key": "varchar(255)",
+    "type": "varchar(50)",
+    "name": "varchar(255)",
+    "mandatory": "varchar(10)",
+    "visible_on_reports": "varchar(10)",
+    "visible_to_learners": "varchar(10)",
+    "dropdown_values": "text",
+    "checkbox_status": "varchar(10)",
+    "selective_availability": "varchar(10)",
+    "branch": "int",
+    "main_domain_availability": "varchar(255)",
+    "previous_key": "varchar(255)"
   }
 }
