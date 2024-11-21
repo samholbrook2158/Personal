@@ -6,7 +6,7 @@ from requests.auth import HTTPBasicAuth
 import sqlalchemy as sa
 from apicall import APICall, APICodes
 from MemphiAddin import MemphiAddin
-# syhdrgihubdsfg
+
 
 class TalentAPI(APICall, MemphiAddin):
     def __init__(self):
