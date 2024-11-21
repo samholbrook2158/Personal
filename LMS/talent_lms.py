@@ -219,13 +219,7 @@ class TalentAPI(APICall, MemphiAddin):
         if use_csv == True and file_name is None:
             logging.error("No file given for process")
             return -1
-        params = {"table_name": table_name,
-                  "file_name": file_name,
-                  "use_csv": use_csv,
-                  "replace": replace
-                  }
         # params = kwargs.get("get_users", {})
-        logging.debug(params)
         # params = self.process_params["get_users"]
         data, _, _, status_code = self.fetch_all_pages_for_endpoint(self.ENDPOINTS['USERS'])
         if status_code != APICodes.OK.value:
@@ -235,67 +229,137 @@ class TalentAPI(APICall, MemphiAddin):
         return self.insert_data(df, table_name=table_name, use_csv=use_csv, file_name=file_name, replace=replace)
 
     def get_courses(self, **kwargs):
-        params = self.process_params["get_courses"]
+        logging.debug(kwargs)
+        table_name = kwargs.get("table_name", None)
+        file_name = kwargs.get("file_name", None)
+        use_csv = kwargs.get("use_csv", False)
+        replace = kwargs.get("replace", True)
+        if use_csv == False and table_name is None:
+            logging.error("No table name given for process")
+            return -1
+        if use_csv == True and file_name is None:
+            logging.error("No file given for process")
+            return -1
         data, _, _, status_code = self.fetch_all_pages_for_endpoint(self.ENDPOINTS['COURSES'])
         if status_code != APICodes.OK.value:
             logging.error("Failed to fetch courses data")
             return -1
         df = pd.DataFrame(data)
-        return self.insert_data(df, **params)
+        return self.insert_data(df, table_name=table_name, use_csv=use_csv, file_name=file_name, replace=replace)
 
     def get_groups(self, **kwargs):
-        params = self.process_params["get_groups"]
+        logging.debug(kwargs)
+        table_name = kwargs.get("table_name", None)
+        file_name = kwargs.get("file_name", None)
+        use_csv = kwargs.get("use_csv", False)
+        replace = kwargs.get("replace", True)
+        if use_csv == False and table_name is None:
+            logging.error("No table name given for process")
+            return -1
+        if use_csv == True and file_name is None:
+            logging.error("No file given for process")
+            return -1
         data, _, _, status_code = self.fetch_all_pages_for_endpoint(self.ENDPOINTS['GROUPS'])
         if status_code != APICodes.OK.value:
             logging.error("Failed to fetch groups data")
             return -1
         df = pd.DataFrame(data)
-        return self.insert_data(df, **params)
+        return self.insert_data(df, table_name=table_name, use_csv=use_csv, file_name=file_name, replace=replace)
 
     def get_branches(self, **kwargs):
-        params = self.process_params["get_branches"]
+        logging.debug(kwargs)
+        table_name = kwargs.get("table_name", None)
+        file_name = kwargs.get("file_name", None)
+        use_csv = kwargs.get("use_csv", False)
+        replace = kwargs.get("replace", True)
+        if use_csv == False and table_name is None:
+            logging.error("No table name given for process")
+            return -1
+        if use_csv == True and file_name is None:
+            logging.error("No file given for process")
+            return -1
         data, _, _, status_code = self.fetch_all_pages_for_endpoint(self.ENDPOINTS['BRANCHES'])
         if status_code != APICodes.OK.value:
             logging.error("Failed to fetch branches data")
             return -1
         df = pd.DataFrame(data)
-        return self.insert_data(df, **params)
+        return self.insert_data(df, table_name=table_name, use_csv=use_csv, file_name=file_name, replace=replace)
 
     def get_ratelimit(self, **kwargs):
-        params = self.process_params["get_ratelimit"]
+        logging.debug(kwargs)
+        table_name = kwargs.get("table_name", None)
+        file_name = kwargs.get("file_name", None)
+        use_csv = kwargs.get("use_csv", False)
+        replace = kwargs.get("replace", True)
+        if use_csv == False and table_name is None:
+            logging.error("No table name given for process")
+            return -1
+        if use_csv == True and file_name is None:
+            logging.error("No file given for process")
+            return -1
         data, _, _, status_code = self.fetch_all_pages_for_endpoint(self.ENDPOINTS['RATELIMIT'])
         if status_code != APICodes.OK.value:
             logging.error("Failed to fetch rate limit data")
             return -1
         df = pd.DataFrame(data)
-        return self.insert_data(df, **params)
+        return self.insert_data(df, table_name=table_name, use_csv=use_csv, file_name=file_name, replace=replace)
 
     def get_categories(self, **kwargs):
-        params = self.process_params["get_categories"]
+        logging.debug(kwargs)
+        table_name = kwargs.get("table_name", None)
+        file_name = kwargs.get("file_name", None)
+        use_csv = kwargs.get("use_csv", False)
+        replace = kwargs.get("replace", True)
+        if use_csv == False and table_name is None:
+            logging.error("No table name given for process")
+            return -1
+        if use_csv == True and file_name is None:
+            logging.error("No file given for process")
+            return -1
         data, _, _, status_code = self.fetch_all_pages_for_endpoint(self.ENDPOINTS['CATEGORIES'])
         if status_code != APICodes.OK.value:
             logging.error("Failed to fetch categories data")
             return -1
         df = pd.DataFrame(data)
-        return self.insert_data(df, **params)
+        return self.insert_data(df, table_name=table_name, use_csv=use_csv, file_name=file_name, replace=replace)
 
     def get_registration(self, **kwargs):
-        params = self.process_params["get_registration"]
+        logging.debug(kwargs)
+        table_name = kwargs.get("table_name", None)
+        file_name = kwargs.get("file_name", None)
+        use_csv = kwargs.get("use_csv", False)
+        replace = kwargs.get("replace", True)
+        if use_csv == False and table_name is None:
+            logging.error("No table name given for process")
+            return -1
+        if use_csv == True and file_name is None:
+            logging.error("No file given for process")
+            return -1
         data, _, _, status_code = self.fetch_all_pages_for_endpoint(self.ENDPOINTS['REGISTRATION'])
         if status_code != APICodes.OK.value:
             logging.error("Failed to fetch registration data")
             return -1
         df = pd.DataFrame(data)
-        return self.insert_data(df, **params)
+        return self.insert_data(df, table_name=table_name, use_csv=use_csv, file_name=file_name, replace=replace)
 
     def get_course_fields(self, **kwargs):
-        params = self.process_params["get_course_fields"]
+        logging.debug(kwargs)
+        table_name = kwargs.get("table_name", None)
+        file_name = kwargs.get("file_name", None)
+        use_csv = kwargs.get("use_csv", False)
+        replace = kwargs.get("replace", True)
+        if use_csv == False and table_name is None:
+            logging.error("No table name given for process")
+            return -1
+        if use_csv == True and file_name is None:
+            logging.error("No file given for process")
+            return -1
         data, _, _, status_code = self.fetch_all_pages_for_endpoint(self.ENDPOINTS['COURSE_FIELDS'])
         if status_code != APICodes.OK.value:
             logging.error("Failed to fetch course fields data")
             return -1
         df = pd.DataFrame(data)
-        return self.insert_data(df, **params)
+        return self.insert_data(df, table_name=table_name, use_csv=use_csv, file_name=file_name, replace=replace)
 
     def fetch_single_item(self, endpoint_key, item_id, id_placeholder):
         """
