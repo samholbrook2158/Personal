@@ -121,18 +121,4 @@
     "main_domain_availability": "varchar(255)",
     "previous_key": "varchar(255)"
   },
-  "course_fields": {
-    "key": "varchar(255)",
-    "type": "varchar(50)",
-    "name": "varchar(255)",
-    "mandatory": "varchar(10)",
-    "visible_on_reports": "varchar(10)",
-    "visible_to_learners": "varchar(10)",
-    "dropdown_values": "text",
-    "checkbox_status": "varchar(10)",
-    "selective_availability": "varchar(10)",
-    "branch": "int",
-    "main_domain_availability": "varchar(255)",
-    "previous_key": "varchar(255)"
-  }
 }
