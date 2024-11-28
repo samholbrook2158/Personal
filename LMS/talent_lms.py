@@ -44,12 +44,17 @@ class TalentAPI(APICall, MemphiAddin):
                                   "use_csv": False, "replace": True}
         }
 
-        
-
     def main_process(self, **kwargs):
         """
         Determines the process and executes the appropriate data retrieval function.
         Pulls the necessary parameters directly from `process_params` based on the process name.
+
+        Parameters:
+            kwargs (dict): Additional parameters, including 'process' to specify the method to execute.
+            (additional json currently included all processes)
+
+        Returns:
+            int: 1 if the process completes successfully, -1 otherwise.
         """
         logging.info("Starting main process")
         logging.debug(kwargs)
@@ -129,10 +134,19 @@ class TalentAPI(APICall, MemphiAddin):
         whether to overwrite existing data or append it. Logs errors in case of failure.
         """
         logging.info(f"Inserting data into {table_name}")
-        if table_name in self.column_types:
-            data_types = self.column_types[
-                table_name]  # Is able to grab table name and columns remain same but new changes don't work
+        clean_table_name = table_name.replace("`", "")
 
+        # Validate the DataFrame
+        for col in df.columns:
+            if df[col].apply(lambda x: isinstance(x, dict)).any():
+                logging.error(f"Column '{col}' contains nested dictionary data. Flatten before inserting.")
+                logging.info(f"Final DataFrame columns: {df.columns}")
+                logging.info(f"Final DataFrame sample: {df.head()}")
+                return -1
+
+        # Ensure DataFrame columns match the table schema
+        if table_name in self.column_types:
+            data_types = self.column_types[table_name]
             for col, dtype in zip(df.columns, data_types):
                 try:
                     if "int" in dtype.lower():
@@ -144,30 +158,32 @@ class TalentAPI(APICall, MemphiAddin):
                 except Exception as e:
                     logging.error(f"Error converting column '{col}' to type '{dtype}': {e}")
 
-        if use_csv:
-            try:
+        # Insert the DataFrame into the database
+        try:
+            if use_csv:
                 df.to_csv(file_name, index=False)
-                logging.debug(f"{len(df)} records saved to {file_name}")
-            except Exception as e:
-                logging.error(f"Error saving data to CSV: {e}")
-                return -1
-        else:
-            try:
+                logging.info(f"{len(df)} records saved to {file_name}")
+            else:
                 if replace:
                     with self.engine.begin() as conn:
                         conn.execute(sa.text(f"TRUNCATE TABLE {table_name}"))
-                df.to_sql(table_name, self.engine, index=False, if_exists="append")
+                df.to_sql(name=clean_table_name, con=self.engine, index=False, if_exists="append")
                 logging.info(f"{len(df)} records inserted into {table_name}")
-            except Exception as e:
-                logging.error(f"Error inserting data into {table_name}: {e}")
-                return -1
+        except Exception as e:
+            logging.error(f"Error inserting data into {table_name}: {e}")
+            return -1
         return 1
 
     # General data fetching and inserting methods
     def get_users(self, **kwargs):
         """
-        Retrieves user data from the 'users' endpoint, fetches paginated data, and inserts it
-        into the database or saves it to a CSV file based on parameters.
+            Fetches users field data from the 'users_fields' endpoint using the talent API. Will then retrieve
+            manually paginated data, formats it into a pandas DataFrame, and inserts it into a database or
+            saves it as a CSV file.
+
+            Parameters:
+                kwargs is the dictionary for params including 'table_name', 'file_name', 'use_csv', and
+                'replace' (set replace to false if you want to append)
         """
         logging.debug("get_users")
         logging.debug(kwargs)
@@ -286,22 +302,87 @@ class TalentAPI(APICall, MemphiAddin):
         return self.insert_data(df, table_name=table_name, use_csv=use_csv, file_name=file_name, replace=replace)
 
     def get_registration(self, **kwargs):
+        """
+            Fetches and processes registration data from the 'registration' endpoint.
+            This method handles nested data structures by flattening fields to ensure compatibility
+            with the pandas DataFrame format before inserting the data into a MySQL table or saving
+            it to a CSV file.
+
+            The flattening process includes:
+            - Extracting and processing nested 'fields' data.
+            - Resolving branch-related fields:
+                - 'branch_name' is derived from a mapping dictionary within the 'fields'.
+                - 'branch' lists are converted into comma-separated strings.
+            - Removing nested data to ensure all columns contain flat, scalar values.
+
+            Notes:
+                - The method logs both the raw and processed 'fields' data for debugging purposes.
+                - The final DataFrame is validated to ensure no nested or non-scalar values remain.
+            """
         logging.debug(kwargs)
         table_name = kwargs.get("table_name", None)
         file_name = kwargs.get("file_name", None)
         use_csv = kwargs.get("use_csv", False)
         replace = kwargs.get("replace", True)
+
         if use_csv == False and table_name is None:
             logging.error("No table name given for process")
             return -1
         if use_csv == True and file_name is None:
             logging.error("No file given for process")
             return -1
+
+        # Fetch data from API
         data, _, _, status_code = self.fetch_all_pages_for_endpoint(self.ENDPOINTS['REGISTRATION'])
         if status_code != APICodes.OK.value:
             logging.error("Failed to fetch registration data")
             return -1
-        df = pd.DataFrame(data)
+
+        # Flatten nested data before creating the DataFrame
+        flattened_data = []
+        for record in data:
+            # Flatten 'fields' column
+            if 'fields' in record:
+                fields = record.pop('fields', {})
+                logging.debug(f"Raw fields data: {fields}")
+
+                # Initialize branch_name to None by default
+                branch_name_dict = fields.pop('branch_name', None) or {}
+                branch_keys = fields.get('branch', [])
+                if isinstance(branch_keys, list) and branch_keys:
+                    # Map branch keys to names in branch_name_dict
+                    fields['branch_name'] = ', '.join(
+                        [branch_name_dict.get(key, '') for key in branch_keys if key in branch_name_dict]
+                    )
+                elif isinstance(branch_keys, str):
+                    # Handle single branch key as a string
+                    fields['branch_name'] = branch_name_dict.get(branch_keys, '')
+                else:
+                    fields['branch_name'] = None
+
+                # Flatten 'branch' into a comma-separated string if it's a list
+                if 'branch' in fields:
+                    fields['branch'] = ','.join(fields['branch']) if isinstance(fields['branch'], list) else fields[
+                        'branch']
+
+                # Add flattened fields back to the record
+                logging.debug(f"Flattened fields data: {fields}")
+                record.update(fields)
+
+            # Append the processed record to the flattened data list
+            flattened_data.append(record)
+
+        # Create a DataFrame with flattened data
+        df = pd.DataFrame(flattened_data)
+
+        # Ensure no nested data remains in any column
+        if 'branch_name' in df.columns:
+            df['branch_name'] = df['branch_name'].astype(str)
+
+        logging.info(f"Flattened registration DataFrame: {df.head()}")
+        logging.info(f"DataFrame columns: {df.columns}")
+
+        # Pass the DataFrame to the insert_data method
         return self.insert_data(df, table_name=table_name, use_csv=use_csv, file_name=file_name, replace=replace)
 
     def get_course_fields(self, **kwargs):
@@ -397,25 +478,66 @@ if __name__ == "__main__":
 
     t = TalentAPI()
 
-    additional_json = {"process": "get_users",
-                       "table_name": "users",
-                       "file_name": "users_data.csv",
-                       "use_csv": False,
-                       "replace": True,
-                       }
+    additional_json = [
+        {"process": "get_users",
+         "table_name": "users",
+         "file_name": "users_data.csv",
+         "use_csv": False,
+         "replace": True},
 
-    # General process calls
-    t.main_process(**additional_json)
-    # t.main_process(process="get_users")
-    # t.main_process(process="get_courses")
-    # t.main_process(process="get_groups")
-    # t.main_process(process="get_branches")
-    # t.main_process(process="get_ratelimit")
-    # t.main_process(process="get_categories")
-    # t.main_process(process="get_registration")
-    # t.main_process(process="get_course_fields")
+        {"process": "get_courses",
+         "table_name": "courses",
+         "file_name": "courses_data.csv",
+         "use_csv": False,
+         "replace": True},
 
-    # Single fetch calls
+        {"process": "get_groups",
+         "table_name": "`groups`",
+         "file_name": "groups_data.csv",
+         "use_csv": False,
+         "replace": True},
+
+        {"process": "get_branches",
+         "table_name": "branches",
+         "file_name": "branches_data.csv",
+         "use_csv": False,
+         "replace": True},
+
+        {"process": "get_ratelimit",
+         "table_name": "ratelimit",
+         "file_name": "ratelimit_data.csv",
+         "use_csv": False,
+         "replace": True},
+
+        {"process": "get_categories",
+         "table_name": "categories",
+         "file_name": "categories_data.csv",
+         "use_csv": False,
+         "replace": True},
+
+        {"process": "get_registration",
+         "table_name": "registration",
+         "file_name": "registration_data.csv",
+         "use_csv": False,
+         "replace": True},
+
+        {"process": "get_course_fields",
+         "table_name": "course_fields",
+         "file_name": "course_fields_data.csv",
+         "use_csv": False,
+         "replace": True},
+    ]
+
+    for table_config in additional_json:
+        additional_json = table_config  # Dynamically assign the current table configuration to `additional_json`
+        logging.info(f"Processing table: {additional_json['table_name']}")
+        result = t.main_process(**additional_json)  # Pass the updated `additional_json`
+        if result == -1:
+            logging.error(f"Failed to process table: {additional_json['table_name']}")
+        else:
+            logging.info(f"Successfully processed table: {additional_json['table_name']}")
+
+    # Single fetch calls, might used later down the road
     # t.main_process(process="get_user_from_id", user_id=173)
     # t.main_process(process="get_course_from_id", course_id=135)
     # t.main_process(process="get_group_from_id", group_id=26)
