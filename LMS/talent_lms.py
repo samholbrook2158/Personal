@@ -10,9 +10,19 @@ from MemphiAddin import MemphiAddin
 
 class TalentAPI(APICall, MemphiAddin):
     def __init__(self):
-        """
-        Initializes the TalentAPI class with configurations for DB and API endpoints from JSON.
-        """
+    """
+    Initializes the TalentAPI class with configurations for database and API endpoints from a JSON file.
+
+    Attributes:
+        CONFIG (dict): Configuration settings loaded from the JSON file.
+        base_url (str): Base URL for API requests.
+        api_key (str): API key for authentication.
+        page_size (int): Default page size for API pagination.
+        ENDPOINTS (dict): Mapping of endpoint names to their respective API paths.
+        engine (sqlalchemy.engine.Engine): SQLAlchemy engine for database connections.
+        process_params (dict): Configuration for various data-fetching processes, including table names,
+                               file names, and whether to use CSV or replace existing data.
+    """
         super().__init__()
         super(MemphiAddin, self).__init__()
 
@@ -45,17 +55,17 @@ class TalentAPI(APICall, MemphiAddin):
         }
 
     def main_process(self, **kwargs):
-        """
-        Determines the process and executes the appropriate data retrieval function.
-        Pulls the necessary parameters directly from `process_params` based on the process name.
+    """
+    Determines the process to execute and runs the corresponding data retrieval function.
 
-        Parameters:
-            kwargs (dict): Additional parameters, including 'process' to specify the method to execute.
-            (additional json currently included all processes)
+    Parameters:
+        kwargs (dict): Keyword arguments containing parameters for the process. Must include:
+            - process (str): Name of the method to execute (e.g., 'get_users').
+            - Additional parameters specific to the method being called.
 
-        Returns:
-            int: 1 if the process completes successfully, -1 otherwise.
-        """
+    Returns:
+        int: 1 if the process completes successfully, -1 otherwise.
+    """
         logging.info("Starting main process")
         logging.debug(kwargs)
         process = kwargs.get("process", None)
@@ -86,10 +96,19 @@ class TalentAPI(APICall, MemphiAddin):
             return -1
 
     def fetch_all_pages_for_endpoint(self, endpoint):
-        """
-        Fetches paginated data from the specified endpoint, handling large datasets
-        by iterating through pages. Logs retrieved data and returns it.
-        """
+    """
+    Fetches paginated data from a specified API endpoint and combines the results.
+
+    Parameters:
+        endpoint (str): The API endpoint to retrieve data from.
+
+    Returns:
+        tuple: A tuple containing:
+            - list: Combined data from all pages.
+            - int: Total number of pages retrieved.
+            - int: Page size used for pagination.
+            - int: HTTP status code of the last response.
+    """
         logging.info(f"Starting fetch for endpoint: {endpoint}")
         page_number = 1
         all_data = []
@@ -127,12 +146,20 @@ class TalentAPI(APICall, MemphiAddin):
         logging.info(f"Total pages fetched: {total_pages}")
         return all_data, total_pages, self.page_size, response.status_code
 
-    def insert_data(self, df: pd.DataFrame, table_name: str, use_csv: bool = False, file_name: str = None,
-                    replace: bool = True):
-        """
-        Inserts data from DataFrame into MySQL table or CSV file as specified. Uses `replace` to decide
-        whether to overwrite existing data or append it. Logs errors in case of failure.
-        """
+    def insert_data(self, df: pd.DataFrame, table_name: str, use_csv: bool = False, file_name: str = None, replace: bool = True):
+    """
+    Inserts data from a Pandas DataFrame into a MySQL table or saves it to a CSV file.
+
+    Parameters:
+        df (pd.DataFrame): The DataFrame containing the data to insert.
+        table_name (str): Name of the target MySQL table.
+        use_csv (bool): If True, saves the data to a CSV file instead of the database. Defaults to False.
+        file_name (str): Name of the CSV file to save the data to (required if use_csv is True).
+        replace (bool): If True, truncates the table before inserting new data. Defaults to True.
+
+    Returns:
+        int: 1 if the insertion is all good, -1 otherwise.
+    """
         logging.info(f"Inserting data into {table_name}")
         clean_table_name = table_name.replace("`", "")
 
@@ -175,16 +202,21 @@ class TalentAPI(APICall, MemphiAddin):
         return 1
 
     # General data fetching and inserting methods
-    def get_users(self, **kwargs):
-        """
-            Fetches users field data from the 'users_fields' endpoint using the talent API. Will then retrieve
-            manually paginated data, formats it into a pandas DataFrame, and inserts it into a database or
-            saves it as a CSV file.
+    def get_courses(self, **kwargs):
+    """
+    Fetches course data from the 'courses' API endpoint, converts it into a DataFrame, and inserts it into a database
+    or saves it as a CSV file.
 
-            Parameters:
-                kwargs is the dictionary for params including 'table_name', 'file_name', 'use_csv', and
-                'replace' (set replace to false if you want to append)
-        """
+    Parameters:
+        kwargs (dict): Additional parameters, including:
+            - table_name (str): Name of the target MySQL table.
+            - file_name (str): Name of the CSV file (if use_csv is True).
+            - use_csv (bool): Whether to save data to a CSV file. Defaults to False.
+            - replace (bool): Whether to replace existing data in the database. Defaults to True.
+
+    Returns:
+        int: 1 if the process succeeds, -1 otherwise.
+    """
         logging.debug("get_users")
         logging.debug(kwargs)
         table_name = kwargs.get("table_name", None)
@@ -302,23 +334,45 @@ class TalentAPI(APICall, MemphiAddin):
         return self.insert_data(df, table_name=table_name, use_csv=use_csv, file_name=file_name, replace=replace)
 
     def get_registration(self, **kwargs):
-        """
-            Fetches and processes registration data from the 'registration' endpoint.
-            This method handles nested data structures by flattening fields to ensure compatibility
-            with the pandas DataFrame format before inserting the data into a MySQL table or saving
-            it to a CSV file.
+    """
+    This requires extra features since the structure of this json has extra nested fields
+    which pandas doesnt like at all.
+    
+    Fetches and processes registration data from the 'registration' API endpoint.
 
-            The flattening process includes:
-            - Extracting and processing nested 'fields' data.
-            - Resolving branch-related fields:
-                - 'branch_name' is derived from a mapping dictionary within the 'fields'.
-                - 'branch' lists are converted into comma-separated strings.
-            - Removing nested data to ensure all columns contain flat, scalar values.
+    This method handles nested data structures by:
+    - Flattening fields to ensure compatibility with the pandas DataFrame format.
+    - Resolving branch-related fields:
+        - Maps branch keys to branch names using a dictionary (`branch_name`).
+        - Converts branch lists into comma-separated strings.
+    - Ensuring all columns in the final DataFrame contain flat, scalar values.
 
-            Notes:
-                - The method logs both the raw and processed 'fields' data for debugging purposes.
-                - The final DataFrame is validated to ensure no nested or non-scalar values remain.
-            """
+    After processing, the method either inserts the data into a database or saves it as a CSV file.
+
+    Parameters:
+        kwargs (dict): Keyword arguments, including:
+            - table_name (str): Name of the MySQL table to insert data into (required if `use_csv` is False).
+            - file_name (str): Name of the CSV file to save data to (required if `use_csv` is True).
+            - use_csv (bool): Whether to save data to a CSV file. Defaults to False.
+            - replace (bool): Whether to replace existing data in the database or CSV file. Defaults to True.
+
+    Example:
+        >>> t = TalentAPI()
+        >>> t.get_registration(
+                table_name="registration",
+                file_name="registration_data.csv",
+                use_csv=False,
+                replace=True
+            )
+
+    Notes:
+        - Logs both the raw and processed `fields` data for debugging purposes.
+        - Validates the DataFrame to ensure there are no nested or non-scalar values.
+        - Handles cases where 'branch_name' or 'branch' fields are missing or malformed.
+
+    Raises:
+        - Logs errors during API calls, data flattening, or database/CSV operations.
+    """
         logging.debug(kwargs)
         table_name = kwargs.get("table_name", None)
         file_name = kwargs.get("file_name", None)
@@ -405,13 +459,17 @@ class TalentAPI(APICall, MemphiAddin):
         return self.insert_data(df, table_name=table_name, use_csv=use_csv, file_name=file_name, replace=replace)
 
     def fetch_single_item(self, endpoint_key, item_id, id_placeholder):
-        """
-        Fetches a single item from the specified endpoint.
-        :param endpoint_key: The key for the endpoint in the ENDPOINTS config.
-        :param item_id: The ID of the item to fetch.
-        :param id_placeholder: The placeholder in the endpoint URL to replace with the item_id.
-        :return: A dictionary with the main fields of the item if successful, None otherwise.
-        """
+    """
+    Fetches a single item from the specified endpoint.
+
+    Parameters:
+        endpoint_key (str): Key of the endpoint in the `ENDPOINTS` configuration.
+        item_id (int or str): ID of the item to fetch.
+        id_placeholder (str): Placeholder in the endpoint URL to be replaced with the item ID.
+
+    Returns:
+        dict: A dictionary containing the item's data, or None if the request fails.
+    """
         logging.info(f"Fetching data for {endpoint_key} ID: {item_id}")
 
         # Construct the URL with the provided item ID
